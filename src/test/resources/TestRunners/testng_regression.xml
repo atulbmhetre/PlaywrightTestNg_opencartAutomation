@@ -6,7 +6,13 @@
         <listener class-name="com.qa.opencart.listeners.ExtentReportListeners"></listener>
     </listeners>
 
-
+    <!-- A test block can contain one or more classes -->
+    <test name="Open Cart HomePage Tests">
+        <classes>
+            <!-- Specify the full package and class name of your test class -->
+            <class name="com.qa.opencart.tests.HomepageTests" />
+        </classes>
+    </test>
     <test name="Open Cart LoginPage Tests">
         <classes>
             <!-- Specify the full package and class name of your test class -->
