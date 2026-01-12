@@ -3,7 +3,9 @@ package com.qa.opencart.base;
 import com.microsoft.playwright.Page;
 import com.qa.opencart.pages.Homepage;
 import com.qa.opencart.playwrightfactory.PlaywrightFactory;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeTest;
 
 import java.util.Properties;
@@ -15,7 +17,7 @@ public class BaseClass {
     protected Homepage homepage;
     protected Properties prop;
 
-    @BeforeTest
+    @BeforeClass
     public void setUp(){
         pf = new PlaywrightFactory();
         prop = pf.intiProperties();
@@ -23,11 +25,10 @@ public class BaseClass {
         homepage = new Homepage(page);
     }
 
-    @AfterTest
+    @AfterClass
     public void tearDown(){
-//        page.close();
-//        page.context().close();
-//        page.context().browser().close();
-        page.context().browser().close();
+        //page.context().browser().close();
+        PlaywrightFactory.getBrowser().close();
+        PlaywrightFactory.getPlaywright().close();
     }
 }

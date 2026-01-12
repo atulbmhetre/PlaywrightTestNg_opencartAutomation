@@ -5,6 +5,8 @@ import com.qa.opencart.constants.AppConstants;
 import com.qa.opencart.pages.LoginPage;
 import org.testng.Assert;
 import org.testng.Reporter;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -12,7 +14,7 @@ public class LoginpageTests extends BaseClass {
 
     LoginPage loginPage;
 
-    @BeforeTest
+    @BeforeClass
     public void navigateToLoginPage(){
         loginPage = homepage.navigateToLoginPage();
     }
