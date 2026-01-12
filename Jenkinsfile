@@ -25,8 +25,8 @@ pipeline {
                 allowMissing: false,
                 alwaysLinkToLastBuild: true,
                 keepAll: true,
-                reportDir: 'test-output/extent-reports',
-                reportFiles: 'index.html',
+                reportDir: 'test-output/test-ExtentReport',
+                reportFiles: 'TestExecutionReport.html',
                 reportName: 'Playwright Extent Report'
             ])
         }
