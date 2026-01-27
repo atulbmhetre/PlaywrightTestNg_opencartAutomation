@@ -9,15 +9,14 @@ pipeline {
         stage('Run Playwright Tests') {
             steps {
                     script {
-                        // Map the friendly name to the actual file path
                         def suiteMap = [
-                            'Smoke': 'src/test/resources/testng_smoke.xml',
-                            'Regression': 'src/test/resources/testng_regression.xml'
-                            'crossbrowser': 'src/test/resources/testng_crossbrowser.xml'
+                            'smoke'        : 'testng_smoke',        // No path, no .xml
+                            'regression'   : 'testng_regression',
+                            'crossbrowser' : 'testng_crossbrowser'
                         ]
-                        def selectedSuite = suiteMap[params.suiteFile]
+                        def selectedFile = suiteMap[params.testSuite]
 
-                        bat "mvn clean test -DsuiteFile=${selectedSuite} -Denv=${params.env} -Dbrowser=${params.browser}"
+                        bat "mvn clean test -DsuiteFile=${selectedFile} -Denv=${params.env}"
                     }
             }
         }
