@@ -7,11 +7,11 @@
     </listeners>
 
     <!-- A test block can contain one or more classes -->
-    <test name="Open Cart UI Regression Tests">
+    <test name="Open Cart Smoke Tests">
         <parameter name="browser" value="chromium"/>
         <groups>
             <run>
-                <include name="regression" />
+                <include name="smoke" />
             </run>
         </groups>
         <classes>

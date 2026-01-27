@@ -1,10 +1,12 @@
 package com.qa.opencart.playwrightfactory;
 
 import com.microsoft.playwright.*;
+import com.qa.opencart.config.ConfigManager;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.Properties;
@@ -39,9 +41,7 @@ public class PlaywrightFactory {
     }
 
 
-    public Page intiBrowser(Properties prop){
-        String browserName = prop.getProperty("browser");
-        System.out.println("Browser asked to launch = " + browserName);
+    public Page intiBrowser(String browserName){
         //playwright = Playwright.create();
         tlPlaywright.set(Playwright.create());
         switch (browserName.toLowerCase()){
@@ -61,40 +61,34 @@ public class PlaywrightFactory {
 //        browser = browserType.launch(new BrowserType.LaunchOptions().setHeadless(Boolean.parseBoolean(prop.getProperty("isHeadless"))));
 //        browserContext = browser.newContext();
 //        page = browserContext.newPage();
-        tlBrowser.set(browserType.launch(new BrowserType.LaunchOptions().setHeadless(Boolean.parseBoolean(prop.getProperty("isHeadless")))));
+        tlBrowser.set(browserType.launch(new BrowserType.LaunchOptions().setHeadless(Boolean.parseBoolean(ConfigManager.get("isHeadless")))));
         tlBrowserContext.set(tlBrowser.get().newContext());
         tlPage.set(tlBrowserContext.get().newPage());
-        System.out.println("Browser " + browserName + " is launched.");
 //        page.navigate(prop.getProperty("url"));
-        tlPage.get().navigate(prop.getProperty("url"));
-        System.out.println("Application is launched.");
-
+        tlPage.get().navigate(ConfigManager.get("url"));
 
         return getPage();
     }
 
-    public Properties intiProperties(){
-        FileInputStream fis = null;
-        try {
-            fis = new FileInputStream("./src/test/resources/config/config.properties");
-            Properties prop = new Properties();
-            prop.load(fis);
-            return prop;
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+//    public Properties intiProperties() throws IOException {
+//        String env = System.getProperty("env", "dev");
+//
+//        String fileName = "config/" + env + ".config.properties";
+//
+//        InputStream is = getClass()
+//                .getClassLoader()
+//                .getResourceAsStream(fileName);
+//
+//        if (is == null) {
+//            throw new IllegalStateException("Environment config file not found: " + fileName);
+//        }
+//
+//        Properties prop = new Properties();
+//        prop.load(is);
+//        return prop;
+//
+//
+//    }
 
-    }
-
-    public static String takeScreenshot(){
-        String path = System.getProperty("user.dir")
-                + "/test-output/extent-reports/screenshots/"
-                + "screenshot_" + System.currentTimeMillis() + ".png";
-        byte[] buffer = getPage().screenshot(new Page.ScreenshotOptions().setFullPage(true).setPath(Paths.get(path)));
-        String base64Path = Base64.getEncoder().encodeToString(buffer);
-        return base64Path;
-    }
 
 }

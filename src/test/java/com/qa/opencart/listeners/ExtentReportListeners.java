@@ -4,24 +4,28 @@ import com.aventstack.extentreports.ExtentReports;
 import com.aventstack.extentreports.ExtentTest;
 import com.aventstack.extentreports.MediaEntityBuilder;
 import com.aventstack.extentreports.reporter.ExtentSparkReporter;
-import org.testng.ITestContext;
-import org.testng.ITestListener;
-import org.testng.ITestResult;
+import com.microsoft.playwright.Page;
+import com.qa.opencart.base.BaseClass;
+import com.qa.opencart.config.ConfigManager;
+import com.qa.opencart.playwrightfactory.PlaywrightFactory;
+import com.qa.opencart.utilities.ScreenCapture;
+import org.testng.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-import static com.qa.opencart.playwrightfactory.PlaywrightFactory.takeScreenshot;
 
-public class ExtentReportListeners implements ITestListener {
+public class ExtentReportListeners implements ISuiteListener, ITestListener {
 
-    private static final String OUTPUT_FOLDER = "./test-output/test-ExtentReport/";
-    private static final String FILE_NAME = "TestExecutionReport.html";
-
+    private static final String OUTPUT_FOLDER = System.getProperty("user.dir") + "/test-output/Test-ExtentReport/";
+    private static final String FILE_NAME =
+            "TestExecutionReport_" + new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss")
+                    .format(new Date()) + ".html";
     private static ExtentReports extent = init();
     public static ThreadLocal<ExtentTest> test = new ThreadLocal<ExtentTest>();
     private static ExtentReports extentReports;
@@ -56,14 +60,19 @@ public class ExtentReportListeners implements ITestListener {
     }
 
     @Override
-    public synchronized void onStart(ITestContext context) {
-        System.out.println("Test Suite started!");
+    public synchronized void onStart(ISuite iSuite) {
+        System.out.println("Test Suite "+ iSuite.getName() +" started");
+        String env = System.getProperty("env","dev");
+        if (env == null || env.isBlank() || env.isEmpty()) {
+            env = "dev";
+        }
+        extent.setSystemInfo("Environment", env);
 
     }
 
     @Override
-    public synchronized void onFinish(ITestContext context) {
-        System.out.println(("Test Suite is ending!"));
+    public synchronized void onFinish(ISuite iSuite) {
+        System.out.println(("Test Suite "+ iSuite.getName() +" ended"));
         extent.flush();
         test.remove();
     }
@@ -75,6 +84,7 @@ public class ExtentReportListeners implements ITestListener {
         int last = qualifiedName.lastIndexOf(".");
         int mid = qualifiedName.substring(0, last).lastIndexOf(".");
         String className = qualifiedName.substring(mid + 1, last);
+        String browser = BaseClass.getBrowserName();
 
         System.out.println(methodName + " started!");
         ExtentTest extentTest = extent.createTest(result.getMethod().getMethodName(),
@@ -86,26 +96,40 @@ public class ExtentReportListeners implements ITestListener {
          * splitByCharacterTypeCamelCase(methodName), StringUtils.SPACE));
          */
         extentTest.assignCategory(className);
+        extentTest.assignCategory(browser);
         test.set(extentTest);
         test.get().getModel().setStartTime(getTime(result.getStartMillis()));
     }
 
-    public synchronized void onTestSuccess(ITestResult result) {
+    @Override
+    public void onTestSuccess(ITestResult result) {
         System.out.println((result.getMethod().getMethodName() + " passed!"));
-        test.get().pass("Test passed");
-        test.get().pass(result.getThrowable(), MediaEntityBuilder.createScreenCaptureFromBase64String(takeScreenshot(),result.getMethod().getMethodName()).build());
+        MediaEntityBuilder media = captureScreenshot();
+        if (media != null) {
+            test.get().pass("Test Passed", media.build());
+        }
         test.get().getModel().setEndTime(getTime(result.getEndMillis()));
     }
 
     public synchronized void onTestFailure(ITestResult result) {
         System.out.println((result.getMethod().getMethodName() + " failed!"));
-        test.get().fail(result.getThrowable(), MediaEntityBuilder.createScreenCaptureFromBase64String(takeScreenshot(),result.getMethod().getMethodName()).build());
+        MediaEntityBuilder media = captureScreenshot();
+        if (media != null) {
+            test.get().fail(result.getThrowable(), media.build());
+        } else {
+            test.get().fail(result.getThrowable());
+        }
         test.get().getModel().setEndTime(getTime(result.getEndMillis()));
     }
 
     public synchronized void onTestSkipped(ITestResult result) {
         System.out.println((result.getMethod().getMethodName() + " skipped!"));
-        test.get().skip(result.getThrowable(), MediaEntityBuilder.createScreenCaptureFromBase64String(takeScreenshot(), result.getMethod().getMethodName()).build());
+        MediaEntityBuilder media = captureScreenshot();
+        if (media != null) {
+            test.get().skip(result.getThrowable(), media.build());
+        } else {
+            test.get().skip(result.getThrowable());
+        }
         test.get().getModel().setEndTime(getTime(result.getEndMillis()));
     }
 
@@ -117,6 +141,18 @@ public class ExtentReportListeners implements ITestListener {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(millis);
         return calendar.getTime();
+    }
+    private MediaEntityBuilder captureScreenshot() {
+
+        Page page = PlaywrightFactory.getPage();
+        String base64 = ScreenCapture.capture(page);
+
+        if (base64 != null) {
+            return MediaEntityBuilder
+                    .createScreenCaptureFromBase64String(base64);
+        }
+
+        return null;
     }
 
 }
