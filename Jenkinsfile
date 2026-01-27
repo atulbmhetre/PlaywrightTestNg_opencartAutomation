@@ -26,7 +26,8 @@ pipeline {
             ])
 
             // Archive full test-output folder
-            archiveArtifacts artifacts: 'test-output/**', fingerprint: true
+            bat 'dir /s test-output
+            archiveArtifacts artifacts: 'test-output/Test-ExtentReport/**/*.*', fingerprint: true
         }
     }
 
