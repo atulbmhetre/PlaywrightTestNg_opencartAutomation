@@ -8,7 +8,7 @@ pipeline {
     stages {
         stage('Run Playwright Tests') {
             steps {
-                bat 'mvn clean test'
+                bat "mvn clean test -Denv=${params.env} -Dbrowser=${params.browser}"
             }
         }
     }
